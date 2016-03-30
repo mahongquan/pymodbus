@@ -132,11 +132,9 @@ class WriteMultipleRegistersRequest(ModbusRequest):
         '''
         ModbusRequest.__init__(self, **kwargs)
         self.address = address
-        if values is None:
-            values = []
-        elif not hasattr(values, '__iter__'):
+        self.values = values or []
+        if not hasattr(values, '__iter__'):
             values = [values]
-        self.values = values
         self.count = len(self.values)
         self.byte_count = self.count * 2
 

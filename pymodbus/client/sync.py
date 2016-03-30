@@ -140,7 +140,7 @@ class ModbusTcpClient(BaseModbusClient):
             address = (self.host, self.port)
             self.socket = socket.create_connection((self.host, self.port),
                 timeout=Defaults.Timeout, source_address=self.source_address)
-        except socket.error, msg:
+        except socket.error as msg:
             _logger.error('Connection to (%s, %s) failed: %s' % \
                 (self.host, self.port, msg))
             self.close()
@@ -197,12 +197,10 @@ class ModbusUdpClient(BaseModbusClient):
         :param host: The host to connect to (default 127.0.0.1)
         :param port: The modbus port to connect to (default 502)
         :param framer: The modbus framer to use (default ModbusSocketFramer)
-        :param timeout: The timeout to use for this socket (default None)
         '''
-        self.host    = host
-        self.port    = port
-        self.socket  = None
-        self.timeout = kwargs.get('timeout', None)
+        self.host = host
+        self.port = port
+        self.socket = None
         BaseModbusClient.__init__(self, framer(ClientDecoder()), **kwargs)
 
     @classmethod
@@ -228,8 +226,7 @@ class ModbusUdpClient(BaseModbusClient):
         try:
             family = ModbusUdpClient._get_address_family(self.host)
             self.socket = socket.socket(family, socket.SOCK_DGRAM)
-            self.socket.settimeout(self.timeout)
-        except socket.error, ex:
+        except socket.error as ex:
             _logger.error('Unable to create udp socket %s' % ex)
             self.close()
         return self.socket != None
@@ -328,7 +325,7 @@ class ModbusSerialClient(BaseModbusClient):
             self.socket = serial.Serial(port=self.port, timeout=self.timeout,
                 bytesize=self.bytesize, stopbits=self.stopbits,
                 baudrate=self.baudrate, parity=self.parity)
-        except serial.SerialException, msg:
+        except serial.SerialException as msg:
             _logger.error(msg)
             self.close()
         return self.socket != None

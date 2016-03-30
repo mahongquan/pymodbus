@@ -104,7 +104,7 @@ class ServerDecoder(IModbusDecoder):
         '''
         try:
             return self._helper(message)
-        except ModbusException, er:
+        except ModbusException as er:
             _logger.warn("Unable to decode request %s" % er)
         return None
 
@@ -125,7 +125,7 @@ class ServerDecoder(IModbusDecoder):
         :param data: The request packet to decode
         :returns: The decoded request or illegal function request object
         '''
-        function_code = ord(data[0])
+        function_code = data[0]
         _logger.debug("Factory Request[%d]" % function_code)
         request = self.__lookup.get(function_code, lambda: None)()
         if not request:
@@ -220,7 +220,7 @@ class ClientDecoder(IModbusDecoder):
         '''
         try:
             return self._helper(message)
-        except ModbusException, er:
+        except ModbusException as er:
             _logger.error("Unable to decode response %s" % er)
         return None
 
@@ -233,7 +233,7 @@ class ClientDecoder(IModbusDecoder):
         :param data: The response packet to decode
         :returns: The decoded request or an exception response object
         '''
-        function_code = ord(data[0])
+        function_code = data[0]
         _logger.debug("Factory Response[%d]" % function_code)
         response = self.__lookup.get(function_code, lambda: None)()
         if function_code > 0x80:

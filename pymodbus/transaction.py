@@ -69,11 +69,9 @@ class ModbusTransactionManager(object):
                 if not result and self.retry_on_empty:
                     retries -= 1
                     continue
-                if _logger.isEnabledFor(logging.DEBUG):
-                    _logger.debug("recv: " + " ".join([hex(ord(x)) for x in result]))
                 self.client.framer.processIncomingPacket(result, self.addTransaction)
                 break;
-            except socket.error, msg:
+            except socket.error as msg:
                 self.client.close()
                 _logger.debug("Transaction failed. (%s) " % msg)
                 retries -= 1
@@ -141,7 +139,7 @@ class DictTransactionManager(ModbusTransactionManager):
 
         :returns: An iterator of the managed transactions
         '''
-        return iter(self.transactions.keys())
+        return iter(list(self.transactions.keys()))
 
     def addTransaction(self, request, tid=None):
         ''' Adds a transaction to the handler
@@ -254,7 +252,7 @@ class ModbusSocketFramer(IModbusFramer):
 
         :param decoder: The decoder factory implementation to use
         '''
-        self.__buffer = ''
+        self.__buffer = b''
         self.__header = {'tid':0, 'pid':0, 'len':0, 'uid':0}
         self.__hsize  = 0x07
         self.decoder  = decoder
@@ -343,6 +341,7 @@ class ModbusSocketFramer(IModbusFramer):
         :param data: The new packet data
         :param callback: The function to send results to
         '''
+        _logger.debug(" ".join([hex(x) for x in data]))
         self.addToFrame(data)
         while self.isFrameReady():
             if self.checkFrame():
@@ -411,7 +410,7 @@ class ModbusRtuFramer(IModbusFramer):
 
         :param decoder: The decoder factory implementation to use
         '''
-        self.__buffer = ''
+        self.__buffer = b''
         self.__header = {}
         self.__hsize  = 0x01
         self.__end    = '\x0d\x0a'
@@ -431,7 +430,7 @@ class ModbusRtuFramer(IModbusFramer):
             frame_size = self.__header['len']
             data = self.__buffer[:frame_size - 2]
             crc = self.__buffer[frame_size - 2:frame_size]
-            crc_val = (ord(crc[0]) << 8) + ord(crc[1])
+            crc_val = (crc[0] << 8) + crc[1]
             return checkCRC(data, crc_val)
         except (IndexError, KeyError):
             return False
@@ -475,8 +474,10 @@ class ModbusRtuFramer(IModbusFramer):
         Beware that this method will raise an IndexError if
         `self.__buffer` is not yet long enough.
         '''
-        self.__header['uid'] = struct.unpack('>B', self.__buffer[0])[0]
-        func_code = struct.unpack('>B', self.__buffer[1])[0]
+        #tmp=self.__buffer[:1]
+        #print(tmp,type(tmp),type(self.__buffer))
+        self.__header['uid'] = struct.unpack('>B', self.__buffer[0:1])[0]
+        func_code = struct.unpack('>B', self.__buffer[1:2])[0]
         pdu_class = self.decoder.lookupPduClass(func_code)
         size = pdu_class.calculateRtuFrameSize(self.__buffer)
         self.__header['len'] = size
@@ -489,6 +490,7 @@ class ModbusRtuFramer(IModbusFramer):
 
         :param message: The most recent packet
         '''
+        #print(type(self.__buffer),type(message))
         self.__buffer += message
 
     def getFrame(self):
@@ -547,6 +549,7 @@ class ModbusRtuFramer(IModbusFramer):
         :param message: The populated request/response to send
         '''
         data = message.encode()
+        #print(data,type(data))
         packet = struct.pack('>BB',
             message.unit_id,
             message.function_code) + data

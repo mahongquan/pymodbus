@@ -127,8 +127,10 @@ def computeCRC(data):
     :returns: The calculated CRC
     '''
     crc = 0xffff
+    #print(type(data))
     for a in data:
-        idx = __crc16_table[(crc ^ ord(a)) & 0xff];
+        #print(a,type(a))
+        idx = __crc16_table[(crc ^ a) & 0xff];
         crc = ((crc >> 8) & 0xff) ^ idx
     swapped = ((crc << 8) & 0xff00) | ((crc >> 8) & 0x00ff)
     return swapped
@@ -154,7 +156,7 @@ def computeLRC(data):
     :returns: The calculated LRC
 
     '''
-    lrc = sum(ord(a) for a in data) & 0xff
+    lrc = sum(a for a in data) & 0xff
     lrc = (lrc ^ 0xff) + 1
     return lrc & 0xff
 
@@ -189,7 +191,7 @@ def rtuFrameSize(buffer, byte_count_pos):
     field, and finally increment the sum by three (one byte for the
     byte count field, two for the CRC).
     '''
-    return struct.unpack('>B', buffer[byte_count_pos])[0] + byte_count_pos + 3
+    return struct.unpack('>B', buffer[byte_count_pos:byte_count_pos+1])[0] + byte_count_pos + 3
 
 #---------------------------------------------------------------------------#
 # Exported symbols

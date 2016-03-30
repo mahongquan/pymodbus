@@ -48,16 +48,6 @@ class BinaryPayloadBuilder(IPayloadBuilder):
         '''
         self._payload = []
 
-    def to_registers(self):
-        ''' Convert the payload buffer into a register
-        layout that can be used as a context block.
-
-        :returns: The register layout to use as a block
-        '''
-        fstring = self._endian + 'H'
-        payload = self.build()
-        return [unpack(fstring, value)[0] for value in payload]
-
     def build(self):
         ''' Return the payload buffer as a list
 
@@ -69,7 +59,7 @@ class BinaryPayloadBuilder(IPayloadBuilder):
         string = str(self)
         length = len(string)
         string = string + ('\x00' * (length % 2))
-        return [string[i:i+2] for i in xrange(0, length, 2)]
+        return [string[i:i+2] for i in range(0, length, 2)]
 
     def add_bits(self, values):
         ''' Adds a collection of bits to be encoded
@@ -209,7 +199,7 @@ class BinaryPayloadDecoder(object):
         :returns: An initialized PayloadDecoder
         '''
         if isinstance(registers, list): # repack into flat binary
-            payload = ''.join(pack(endian + 'H', x) for x in registers)
+            payload = ''.join(pack('>H', x) for x in registers)
             return klass(payload, endian)
         raise ParameterException('Invalid collection of registers supplied')
 
