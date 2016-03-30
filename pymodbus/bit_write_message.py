@@ -160,7 +160,7 @@ class WriteMultipleCoilsRequest(ModbusRequest):
         if not values: values = []
         elif not hasattr(values, '__iter__'): values = [values]
         self.values  = values
-        self.byte_count = (len(self.values) + 7) / 8
+        self.byte_count = int((len(self.values) + 7) / 8)
 
     def encode(self):
         ''' Encodes write coils request
@@ -168,7 +168,7 @@ class WriteMultipleCoilsRequest(ModbusRequest):
         :returns: The byte encoded message
         '''
         count   = len(self.values)
-        self.byte_count = (count + 7) / 8
+        self.byte_count = int((count + 7) / 8)
         packet  = struct.pack('>HHB', self.address, count, self.byte_count)
         packet += pack_bitstring(self.values)
         return packet
@@ -239,7 +239,7 @@ class WriteMultipleCoilsResponse(ModbusResponse):
         :param data: The packet data to decode
         '''
         self.address, self.count = struct.unpack('>HH', data)
-
+        #print("---------------------",data,self.address,self.count,type(self.address),type(self.count))
     def __str__(self):
         ''' Returns a string representation of the instance
 

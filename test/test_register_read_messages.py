@@ -6,7 +6,7 @@ from pymodbus.register_read_message import ReadRegistersResponseBase
 from pymodbus.exceptions import *
 from pymodbus.pdu import ModbusExceptions
 
-from modbus_mocks import MockContext, FakeList
+from .modbus_mocks import MockContext, FakeList
 
 #---------------------------------------------------------------------------#
 # Fixture
@@ -34,17 +34,17 @@ class ReadRegisterMessagesTest(unittest.TestCase):
         self.value  = 0xabcd
         self.values = [0xa, 0xb, 0xc]
         self.request_read  = {
-            ReadRegistersRequestBase(1, 5)                  :'\x00\x01\x00\x05',
-            ReadHoldingRegistersRequest(1, 5)               :'\x00\x01\x00\x05',
-            ReadInputRegistersRequest(1,5)                  :'\x00\x01\x00\x05',
-            ReadWriteMultipleRegistersRequest(**arguments)  :'\x00\x01\x00\x05\x00\x01\x00'
-                                                             '\x05\x0a\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+            ReadRegistersRequestBase(1, 5)                  :b'\x00\x01\x00\x05',
+            ReadHoldingRegistersRequest(1, 5)               :b'\x00\x01\x00\x05',
+            ReadInputRegistersRequest(1,5)                  :b'\x00\x01\x00\x05',
+            ReadWriteMultipleRegistersRequest(**arguments)  :b'\x00\x01\x00\x05\x00\x01\x00'
+                                                             b'\x05\x0a\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
         }
         self.response_read  = {
-            ReadRegistersResponseBase(self.values)          :'\x06\x00\x0a\x00\x0b\x00\x0c',
-            ReadHoldingRegistersResponse(self.values)       :'\x06\x00\x0a\x00\x0b\x00\x0c',
-            ReadInputRegistersResponse(self.values)         :'\x06\x00\x0a\x00\x0b\x00\x0c',
-            ReadWriteMultipleRegistersResponse(self.values) :'\x06\x00\x0a\x00\x0b\x00\x0c',
+            ReadRegistersResponseBase(self.values)          :b'\x06\x00\x0a\x00\x0b\x00\x0c',
+            ReadHoldingRegistersResponse(self.values)       :b'\x06\x00\x0a\x00\x0b\x00\x0c',
+            ReadInputRegistersResponse(self.values)         :b'\x06\x00\x0a\x00\x0b\x00\x0c',
+            ReadWriteMultipleRegistersResponse(self.values) :b'\x06\x00\x0a\x00\x0b\x00\x0c',
         }
 
     def tearDown(self):
@@ -53,16 +53,16 @@ class ReadRegisterMessagesTest(unittest.TestCase):
         del self.response_read
 
     def testReadRegisterResponseBase(self):
-        response = ReadRegistersResponseBase(range(10))
+        response = ReadRegistersResponseBase(list(range(10)))
         for index in range(10):
             self.assertEqual(response.getRegister(index), index)
 
     def testRegisterReadRequests(self):
-        for request, response in self.request_read.iteritems():
+        for request, response in self.request_read.items():
             self.assertEqual(request.encode(), response)
 
     def testRegisterReadResponses(self):
-        for request, response in self.response_read.iteritems():
+        for request, response in self.response_read.items():
             self.assertEqual(request.encode(), response)
 
     def testRegisterReadResponseDecode(self):
@@ -72,7 +72,8 @@ class ReadRegisterMessagesTest(unittest.TestCase):
             [0x0a,0x0b,0x0c],
             [0x0a,0x0b,0x0c, 0x0a,0x0b,0x0c],
         ]
-        values = sorted(self.response_read.iteritems())
+        values = sorted(list(self.response_read.items()))
+        print(values)
         for packet, register in zip(values, registers):
             request, response = packet
             request.decode(response)
@@ -152,7 +153,11 @@ class ReadRegisterMessagesTest(unittest.TestCase):
         self.assertEqual(response.exception_code, ModbusExceptions.IllegalValue)
 
     def testReadWriteMultipleRegistersRequestDecode(self):
-        request, response = sorted(self.request_read.items())[-1]
+        #print("here")
+        #print(self.request_read.items())
+        request, response = list(self.request_read.items())[-1]
+        print(request,response,type(request))
+        print(dir(request))
         request.decode(response)
         self.assertEqual(request.read_address, 0x01)
         self.assertEqual(request.write_address, 0x01)
@@ -162,9 +167,9 @@ class ReadRegisterMessagesTest(unittest.TestCase):
         self.assertEqual(request.write_registers, [0x00]*5)
 
     def testSerializingToString(self):
-        for request in self.request_read.iterkeys():
+        for request in self.request_read.keys():
             self.assertTrue(str(request) != None)
-        for request in self.response_read.iterkeys():
+        for request in self.response_read.keys():
             self.assertTrue(str(request) != None)
 
 #---------------------------------------------------------------------------#

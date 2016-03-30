@@ -28,7 +28,7 @@ class SimpleUtilityTest(unittest.TestCase):
     def setUp(self):
         ''' Initializes the test environment '''
         self.data = struct.pack('>HHHH', 0x1234, 0x2345, 0x3456, 0x4567)
-        self.string = "test the computation"
+        self.string = b"test the computation"
         self.bits = [True, False, True, False, True, False, True, False]
 
     def tearDown(self):

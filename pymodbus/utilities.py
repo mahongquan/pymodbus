@@ -58,18 +58,18 @@ def pack_bitstring(bits):
         bits   = [False, True, False, True]
         result = pack_bitstring(bits)
     '''
-    ret = ''
+    ret = b''
     i = packed = 0
     for bit in bits:
         if bit: packed += 128
         i += 1
         if i == 8:
-            ret += chr(packed)
+            ret += bytes([packed])
             i = packed = 0
         else: packed >>= 1
     if i > 0 and i < 8:
         packed >>= (7 - i)
-        ret += chr(packed)
+        ret += bytes([packed])
     return ret
 
 
@@ -86,7 +86,7 @@ def unpack_bitstring(string):
     byte_count = len(string)
     bits = []
     for byte in range(byte_count):
-        value = ord(string[byte])
+        value = string[byte]
         for _ in range(8):
             bits.append((value & 1) == 1)
             value >>= 1

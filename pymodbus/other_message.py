@@ -311,7 +311,7 @@ class GetCommEventLogResponse(ModbusResponse):
 
         :param data: The packet data to decode
         '''
-        length = struct.unpack('>B', data[0])[0]
+        length = struct.unpack('>B', data[0:1])[0]
         status = struct.unpack('>H', data[1:3])[0]
         self.status = (status == ModbusStatus.Ready)
         self.event_count = struct.unpack('>H', data[3:5])[0]
@@ -319,7 +319,7 @@ class GetCommEventLogResponse(ModbusResponse):
 
         self.events = []
         for e in range(7, length + 1):
-            self.events.append(struct.unpack('>B', data[e])[0])
+            self.events.append(struct.unpack('>B', data[e:e+1])[0])
 
     def __str__(self):
         ''' Builds a representation of the response
@@ -413,9 +413,9 @@ class ReportSlaveIdResponse(ModbusResponse):
 
         :param data: The packet data to decode
         '''
-        length = struct.unpack('>B', data[0])[0]
+        length = struct.unpack('>B', data[0:1])[0]
         self.identifier = data[1:length + 1]
-        status = struct.unpack('>B', data[-1])[0]
+        status = struct.unpack('>B', bytes([data[-1]]))[0]
         self.status = status == ModbusStatus.SlaveOn
 
     def __str__(self):

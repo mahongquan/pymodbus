@@ -108,7 +108,7 @@ class ReadFileRecordRequest(ModbusRequest):
         :param data: The data to decode into the address
         '''
         self.records = []
-        byte_count = struct.unpack('B', data[0])[0]
+        byte_count = struct.unpack('B', data[0:1])[0]
         for count in range(1, byte_count, 7):
             decoded = struct.unpack('>BHHH', data[count:count+7])
             record  = FileRecord(file_number=decoded[1],
@@ -164,7 +164,7 @@ class ReadFileRecordResponse(ModbusResponse):
         :param data: The packet data to decode
         '''
         count, self.records = 1, []
-        byte_count = struct.unpack('B', data[0])[0]
+        byte_count = struct.unpack('B', data[0:1])[0]
         while count < byte_count:
             response_length, reference_type = struct.unpack('>BB', data[count:count+2])
             count += response_length + 1 # the count is not included
@@ -210,7 +210,7 @@ class WriteFileRecordRequest(ModbusRequest):
         :param data: The data to decode into the address
         '''
         count, self.records = 1, []
-        byte_count = struct.unpack('B', data[0])[0]
+        byte_count = struct.unpack('B', data[0:1])[0]
         while count < byte_count:
             decoded = struct.unpack('>BHHH', data[count:count+7])
             response_length = decoded[3] * 2
@@ -266,7 +266,7 @@ class WriteFileRecordResponse(ModbusResponse):
         :param data: The data to decode into the address
         '''
         count, self.records = 1, []
-        byte_count = struct.unpack('B', data[0])[0]
+        byte_count = struct.unpack('B', data[0:1])[0]
         while count < byte_count:
             decoded = struct.unpack('>BHHH', data[count:count+7])
             response_length = decoded[3] * 2

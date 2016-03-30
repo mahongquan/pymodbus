@@ -313,7 +313,7 @@ class ReadWriteMultipleRegistersResponse(ModbusResponse):
 
         :returns: The encoded packet
         '''
-        result = chr(len(self.registers) * 2)
+        result = bytes([len(self.registers) * 2])
         for register in self.registers:
             result += struct.pack('>H', register)
         return result
