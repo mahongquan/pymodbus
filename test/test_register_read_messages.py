@@ -155,7 +155,7 @@ class ReadRegisterMessagesTest(unittest.TestCase):
     def testReadWriteMultipleRegistersRequestDecode(self):
         #print("here")
         #print(self.request_read.items())
-        request, response = list(self.request_read.items())[-1]
+        request, response = self.request_read[3]
         print(request,response,type(request))
         print(dir(request))
         request.decode(response)
